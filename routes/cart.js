@@ -1,4 +1,4 @@
-const pool = require('./config').default;
+const pool = require('../config').default;
 
 // cart items
 const addCartItems = async (req, res) => {

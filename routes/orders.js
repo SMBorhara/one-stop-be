@@ -1,4 +1,4 @@
-const pool = require('./config').default;
+const pool = require('../config').default;
 
 const getOrders = async (req, res) => {
 	try {

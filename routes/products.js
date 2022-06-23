@@ -1,4 +1,4 @@
-const pool = require('./config').default;
+const pool = require('../config').default;
 
 // view all products
 const getProducts = async (req, res) => {

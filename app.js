@@ -5,16 +5,17 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 require('dotenv').config();
 
-const port = 3002;
+const port = process.env.PORT || 3000;
 
 // files and functions
 const pool = require('./config').default;
-const products = require('./products');
-const user = require('./user');
+const products = require('./routes/products');
+const user = require('./routes/user');
+const register = require('./routes/register');
 const { get } = require('http');
 require('./passport')(passport);
-const cart = require('./cart');
-const getOrders = require('./orders');
+const cart = require('./routes/cart');
+const getOrders = require('./routes/orders');
 
 // parser
 app.use(express.json());
@@ -61,7 +62,7 @@ app.get('/products/:category', products.getCategory);
 app.get('/products/:name', products.getProduct);
 
 // new user register
-app.post('/register', user.registerUser);
+app.post('/onestop/register', register.registerUser);
 
 // profile info updates
 app.patch('/:username/profile', user.updateProfile);
