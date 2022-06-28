@@ -9,10 +9,10 @@ const registerUser = async (req, res) => {
 	try {
 		const { username } = req.body;
 		const { password } = req.body;
-
+		console.log(req.body);
 		const user = await pool.query('SELECT username FROM users');
 		console.log(user);
-
+		console.log(password);
 		if (!user) {
 			res.send('username already taken').redirect('/register');
 		} else {
@@ -24,6 +24,7 @@ const registerUser = async (req, res) => {
 				[id, username, hashedPass]
 			);
 
+			// res.redirect(`${username}/profile`);
 			res.json(`${username} created!`);
 		}
 	} catch (err) {

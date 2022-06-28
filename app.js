@@ -3,12 +3,13 @@ const session = require('express-session');
 const app = express();
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const cors = require('cors');
 require('dotenv').config();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
 // files and functions
-const pool = require('./config').default;
+const pool = require('./config');
 const products = require('./routes/products');
 const user = require('./routes/user');
 const register = require('./routes/register');
@@ -25,8 +26,27 @@ app.use(
 	})
 );
 
+//Cors enabled
+app.use(cors());
+app.use(function (req, res, next) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header(
+		'Access-Control-Allow-Headers',
+		'Origin, X-Requested-With, Content-Type, Accept'
+	);
+	res.header(
+		'Access-Control-Allow-Methods',
+		'POST, GET, PATCH, DELETE, OPTIONS'
+	);
+	next();
+});
+
 app.use(
-	session({ secret: 'lucky duck', resave: false, saveUninitialized: false })
+	session({
+		secret: 'lucky duck',
+		resave: false,
+		saveUninitialized: false,
+	})
 );
 
 // middleware
@@ -37,6 +57,9 @@ app.use(passport.session());
 app.get('/onestop', (req, res) => {
 	res.json('One Stop Mama');
 });
+
+// product list
+app.get('/onestop/products', products.getProducts);
 
 // login
 app.post('/onestop/login', (req, res) => {
@@ -52,9 +75,6 @@ app.post('/onestop/login', (req, res) => {
 // 	res.redirect('/');
 // });
 
-// product list
-app.get('/products', products.getProducts);
-
 // category list
 app.get('/products/:category', products.getCategory);
 
@@ -65,7 +85,7 @@ app.get('/products/:name', products.getProduct);
 app.post('/onestop/register', register.registerUser);
 
 // profile info updates
-app.patch('/:username/profile', user.updateProfile);
+app.patch('/onestop/username/profile', user.updateProfile);
 
 // // view user profile by username
 app.get('/:username/profile', user.getProfile);

@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const pool = require('./config').default;
+const pool = require('./config')
 const LocalStrategy = require('passport-local').Strategy;
 
 module.exports = function (passport) {

@@ -1,4 +1,4 @@
-const pool = require('../config').default;
+const pool = require('../config');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
