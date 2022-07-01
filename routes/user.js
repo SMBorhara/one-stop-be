@@ -2,39 +2,26 @@ const pool = require('../config');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
-// register new user
-const registerUser = async (req, res) => {
-	let id = uuidv4();
-
+// view profile by username
+const getProfile = async (req, res) => {
 	try {
 		const { username } = req.body;
-		const { password } = req.body;
-
-		const user = await pool.query('SELECT username FROM users');
-		console.log(user);
-
-		if (user) {
-			res.send('username already taken').redirect('/register');
-		} else {
-			//hash password
-			const salt = await bcrypt.genSalt(5);
-			const hashedPass = await bcrypt.hash(password, salt);
-			const newUser = await pool.query(
-				'INSERT INTO users (id, username, password) VALUES($1, $2, $3) RETURNING *',
-				[id, username, hashedPass]
-			);
-
-			res.json(newUser.rows[0]);
-		}
+		console.log(username);
+		const userProfile = await pool.query(
+			'SELECT * FROM users WHERE username = $1',
+			[username]
+		);
+		console.log(userProfile);
+		res.json(userProfile.rows[0]);
 	} catch (err) {
 		console.error(err.message);
 	}
 };
 
 // update profile
-
 const updateProfile = async (req, res) => {
 	try {
+		console.log(req.params);
 		const { username } = req.params;
 		const email = req.body.email;
 		const address = req.body.address;
@@ -59,24 +46,7 @@ const updateProfile = async (req, res) => {
 	}
 };
 
-// view profile by username
-const getProfile = async (req, res) => {
-	try {
-		const { username } = req.params;
-		console.log(username);
-		const userProfile = await pool.query(
-			'SELECT * FROM users WHERE username = $1',
-			[username]
-		);
-		console.log(userProfile);
-		res.json(userProfile.rows[0]);
-	} catch (err) {
-		console.error(err.message);
-	}
-};
-
 module.exports = {
-	registerUser,
 	updateProfile,
 	getProfile,
 };

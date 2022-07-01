@@ -54,20 +54,24 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // home page display
-app.get('/onestop', (req, res) => {
+app.get('/', (req, res) => {
 	res.json('One Stop Mama');
 });
 
 // product list
-app.get('/onestop/products', products.getProducts);
+app.get('/products', products.getProducts);
 
 // login
-app.post('/onestop/login', (req, res) => {
+app.post('/login', (req, res) => {
 	passport.authenticate('local', function (err, user, info) {
 		// console.log(user);
 		res.send(user.rows[0]);
 	})(req, res);
 });
+
+// user routes
+app.post('/register', register.registerUser);
+app.get('/username', user.getProfile);
 
 // logout
 // app.get('/onestop/logout', (req, res) => {
@@ -81,17 +85,14 @@ app.get('/products/:category', products.getCategory);
 // product name
 app.get('/products/:name', products.getProduct);
 
-// new user register
-app.post('/onestop/register', register.registerUser);
-
 // profile info updates
-app.patch('/onestop/username/profile', user.updateProfile);
+app.patch('/onestop/users/:username/profile', user.updateProfile);
 
-// // view user profile by username
-app.get('/:username/profile', user.getProfile);
+// // view all usernames
 
-app.get('/users', async (req, res) => {
-	const userList = await pool.query('SELECT * FROM users');
+app.get('/usernames', async (req, res) => {
+	const userList = await pool.query('SELECT username FROM users');
+	console.log(userList.rows);
 	res.json(userList.rows);
 });
 
