@@ -1,12 +1,13 @@
 const express = require('express');
 const session = require('express-session');
-const app = express();
+
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const Auth0Strategy = require('passport-auth0');
 const cors = require('cors');
 require('dotenv').config();
 
-const port = process.env.PORT || 8000;
+const authRouter = require('./auth');
 
 // files and functions
 const pool = require('./config');
@@ -17,6 +18,9 @@ const { get } = require('http');
 require('./passport')(passport);
 const cart = require('./routes/cart');
 const getOrders = require('./routes/orders');
+
+const app = express();
+const port = process.env.PORT || 8000;
 
 // parser
 app.use(express.json());
@@ -41,17 +45,63 @@ app.use(function (req, res, next) {
 	next();
 });
 
+// session
 app.use(
 	session({
-		secret: 'lucky duck',
+		secret: process.env.SESSION_SECRET,
+		cookie: {},
 		resave: false,
 		saveUninitialized: false,
 	})
 );
 
-// middleware
+if (app.get('env') === 'production') {
+	// Serve secure cookies, requires HTTPS
+	session.cookie.secure = true;
+}
+
+// passport
+const strategy = new Auth0Strategy(
+	{
+		domain: process.env.AUTH0_DOMAIN,
+		clientID: process.env.AUTH0_CLIENT_ID,
+		clientSecret: process.env.AUTH0_CLIENT_SECRET,
+		callbackURL: process.env.AUTH0_CALLBACK_URL,
+	},
+	(accessToken, refreshToken, extraParams, profile, done) => {
+		return done(null, profile);
+	}
+);
+// app configuration
+passport.use(strategy);
 app.use(passport.initialize());
 app.use(passport.session());
+
+passport.serializeUser(function (user, done) {
+	console.log('serialize user is executing');
+	done(null, user.id);
+});
+
+passport.deserializeUser(function (id, done) {
+	pool.query(
+		'SELECT id, username FROM users WHERE id = $1',
+		[parseInt(id, 10)],
+		(err, results) => {
+			if (err) {
+				return done(err);
+			}
+
+			done(null, results.rows[0]);
+		}
+	);
+});
+
+app.use((req, res, next) => {
+	res.locals.isAuthenticated = req.isAuthenticated();
+	next();
+});
+
+app.use('/', authRouter);
 
 // home page display
 app.get('/', (req, res) => {
@@ -65,16 +115,16 @@ app.get('/products', products.getProducts);
 app.post('/login', (req, res) => {
 	passport.authenticate('local', function (err, user, info) {
 		// console.log(user);
-		res.send(user.rows[0]);
+		res.send(user.rows);
 	})(req, res);
 });
 
 // user routes
 app.post('/register', register.registerUser);
-app.get('/username', user.getProfile);
+app.get('/profile', user.getProfile);
 
 // logout
-// app.get('/onestop/logout', (req, res) => {
+// app.get('/logout', (req, res) => {
 // 	req.logout();
 // 	res.redirect('/');
 // });
@@ -86,7 +136,7 @@ app.get('/products/:category', products.getCategory);
 app.get('/products/:name', products.getProduct);
 
 // profile info updates
-app.patch('/onestop/users/:username/profile', user.updateProfile);
+app.patch('/profile', user.updateProfile);
 
 // // view all usernames
 
@@ -111,10 +161,3 @@ app.use(express.static('public'));
 app.listen(port, () => {
 	console.log(`Banging my head app running on port: ${port}`);
 });
-
-/* Routes
-home page - http://localhost:3002/onestop
-login - http://localhost:3002/onestop/login
-
-
-*/

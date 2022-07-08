@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const pool = require('./config')
+const pool = require('./config');
 const LocalStrategy = require('passport-local').Strategy;
 
 module.exports = function (passport) {
@@ -10,6 +10,7 @@ module.exports = function (passport) {
 				userMatch = await pool.query('SELECT * FROM users WHERE username=$1', [
 					username,
 				]);
+				// console.log(userMatch);
 				if (!userMatch) {
 					return done(null, false, { message: 'username not found' });
 				}
@@ -17,7 +18,7 @@ module.exports = function (passport) {
 					'SELECT password FROM users WHERE username=$1',
 					[username]
 				);
-
+				// console.log(userPass);
 				bcrypt.compare(password, userPass.rows[0].password, (err, isMatch) => {
 					if (err) throw err;
 					if (isMatch) {
@@ -30,22 +31,5 @@ module.exports = function (passport) {
 		)
 	);
 
-	passport.serializeUser(function (user, done) {
-		console.log('serialize user is executing');
-		done(null, user.id);
-	});
-
-	passport.deserializeUser(function (id, done) {
-		pool.query(
-			'SELECT id, username FROM users WHERE id = $1',
-			[parseInt(id, 10)],
-			(err, results) => {
-				if (err) {
-					return done(err);
-				}
-
-				done(null, results.rows[0]);
-			}
-		);
-	});
+	
 };
