@@ -6,6 +6,7 @@ const passport = require('passport');
 const Auth0Strategy = require('passport-auth0');
 const cors = require('cors');
 require('dotenv').config();
+const path = require('path');
 
 const authRouter = require('./auth');
 
@@ -30,6 +31,12 @@ app.use(
 		extended: true,
 	})
 );
+
+app.use(express.static('../one-stop-fe/build'));
+
+if (process.env.NODE_ENV === 'production') {
+	app.use(express.static(path.join(_dirname, 'client/build')));
+}
 
 //Cors enabled
 app.use(function (req, res, next) {
@@ -157,7 +164,6 @@ app.post('/:username/checkout/payment', cart.payment);
 // orders
 app.get('/:username/orders', getOrders.getOrders);
 
-app.use(express.static('public'));
 app.listen(port, () => {
 	console.log(`Banging my head app running on port: ${port}`);
 });
