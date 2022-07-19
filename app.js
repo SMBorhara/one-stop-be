@@ -24,8 +24,13 @@ const getOrders = require('./routes/orders');
 const app = express();
 const port = process.env.PORT || 8000;
 
+const isProduction = process.env.NODE_ENV === 'production';
+const origin = {
+	origin: isProduction ? 'https://one-stop-back.herokuapp.com' : '*',
+};
+
 // parser
-// app.use(cors());
+app.use(cors(origin));
 app.use(express.json());
 app.use(
 	express.urlencoded({
