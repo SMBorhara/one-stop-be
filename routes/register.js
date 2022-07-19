@@ -10,7 +10,7 @@ const registerUser = async (req, res) => {
 		const { email } = req.body;
 		const { username } = req.body;
 		const { password } = req.body;
-		console.log(username);
+		console.log(req.body);
 		const userCheck = await pool.query(
 			'SELECT username FROM users WHERE username = $1',
 			[username]
@@ -26,7 +26,7 @@ const registerUser = async (req, res) => {
 			const salt = await bcrypt.genSalt(5);
 			const hashedPass = await bcrypt.hash(password, salt);
 			const newUser = await pool.query(
-				'INSERT INTO users (id, username, password, email) VALUES($1, $2, $3, $4) RETURNING *',
+				'INSERT INTO users (id, username, password, email) VALUES($1, $2 , $3, $4) RETURNING *',
 				[id, username, hashedPass, email]
 			);
 

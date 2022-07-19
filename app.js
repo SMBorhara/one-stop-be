@@ -5,13 +5,14 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const Auth0Strategy = require('passport-auth0');
 const cors = require('cors');
+const pool = require('./config');
 require('dotenv').config();
 const path = require('path');
 
 const authRouter = require('./auth');
 
 // files and functions
-const pool = require('./config');
+
 const products = require('./routes/products');
 const user = require('./routes/user');
 const register = require('./routes/register');
@@ -31,12 +32,6 @@ app.use(
 		extended: true,
 	})
 );
-
-app.use(express.static('../one-stop-fe/build'));
-
-if (process.env.NODE_ENV === 'production') {
-	app.use(express.static(path.join(_dirname, 'client/build')));
-}
 
 //Cors enabled
 app.use(function (req, res, next) {
@@ -147,7 +142,7 @@ app.patch('/profile', user.updateProfile);
 
 // // view all usernames
 
-app.get('/usernames', async (req, res) => {
+app.get('/users', async (req, res) => {
 	const userList = await pool.query('SELECT username FROM users');
 	console.log(userList.rows);
 	res.json(userList.rows);
