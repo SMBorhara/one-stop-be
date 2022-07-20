@@ -16,7 +16,7 @@ const registerUser = async (req, res) => {
 			[username]
 		);
 		const userName = userCheck.rows;
-		console.log(userName);
+		console.log(userCheck);
 
 		// console.log(password);
 		if (userName.length) {
